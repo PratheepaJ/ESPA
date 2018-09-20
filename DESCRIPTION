@@ -1,0 +1,21 @@
+Package: ESPA
+Type: Package
+Title: An Empirical Saddlepoint Approximation Based Method for Smoothing Survival Functions Under Right Censoring.
+Version: 0.1.0
+Authors@R: c(
+    person("Jeganathan", "Pratheepa", , "jpratheepa31@gmail.com", role = c("cre","aut")),
+    person("Trindade, Alex", role = "aut")
+  )
+Maintainer: Pratheepa Jeganathan <jpratheepa31@gmail.com>
+Description: This implements the empirical saddlepoint approximation 
+  based method for producing a smooth survival function, density function 
+  for right-censored data.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.0
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+BugReports: https://github.com/PratheepaJ/ESPA/issues

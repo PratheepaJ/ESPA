@@ -1,0 +1,265 @@
+---
+title: "Workflow : An Empirical Saddlepoint Approximation Based Method for Smoothing Survival Functions Under Right Censoring"
+author:
+  name: Pratheepa Jeganathan
+  affiliation: Department of Statistics, Stanford University
+  email: jpratheepa31@gmail.com
+date: "`r Sys.Date()`"
+output: 
+    rmarkdown::html_vignette:
+        toc_float:  true
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Install [R](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/). Open this `Rmd` file in RStudio. Then run the following code to install all required packages.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+pkgs <- c("actuar", "survival", "ggplot2", "gridExtra", "asaur")
+
+#   installed packages that were not installed already
+source("http://bioconductor.org/biocLite.R")
+biocLite(setdiff(pkgs,installed.packages()), suppressUpdates = TRUE)
+
+#devtools::install_github("PratheepaJ/ESPA")
+
+```
+
+
+```{r}
+library(actuar)#     heavy tailed distributions
+library(survival)
+require(ggplot2)
+require(gridExtra)
+library(asaur)# dataset "gastricXelox"
+devtools::load_all(".")
+```
+
+
+## AML data 
+
+-  Choose the first 11 observations that fall into 'mainitained' group.
+
+```{r}
+x <- citation("asaur")
+x <- citation("survival")
+toBibtex(x)
+```
+
+- Data
+
+```{r}
+d1 <- aml[1:11,]
+time1 <- d1[,1]
+status1 <- d1[,2]
+```
+
+- KM
+
+```{r}
+survob <- Surv(time=time1,event=status1)
+fit1 <- survfit(survob~1, conf.type="none") #conf.type="plain" for 95% CI
+```
+
+- Compute the support
+
+```{r }
+supp1 <- ESPA_supp(time1, status1)
+t.grid1  <- seq(supp1[1], supp1[2], by=.1)
+```
+
+- Compute survival function over a grid of points
+
+```{r}
+saddle.sur1 <- rep(0,length(t.grid1))
+
+for(i in 1:length(t.grid1)){
+    saddle.sur1[i] = ESPA_survival(t.grid1[i], time1, status1, inc=.08)
+    }
+
+```
+
+- Plot the survival function
+
+```{r}
+my.lwd <- 2
+title <-  "Survival Function: aml (n=11)"
+plot(fit1,
+  xlab = "time", 
+  ylab = "", 
+  main = title,
+  lty = c(1,3,3), 
+  conf.int = T, 
+  yaxs = "i", 
+  lwd = my.lwd, 
+  xlim = c(supp1[1],supp1[2]), 
+  col=c("black","grey","grey"))
+
+points(t.grid1, saddle.sur1, type='l', lwd=my.lwd, col='blue', lty=2)
+legend('bottomleft', legend=c('Kaplan-Meier','ESPA'),lwd = my.lwd,
+       col=c('black','blue'), lty=c(1,2,4))
+```
+
+## Ovarian data
+    
+- Data
+
+```{r}
+d <- ovarian
+time <- d$futime
+status <- d$fustat
+```
+
+- KM
+
+```{r}
+survob <- Surv(time=time,event=status,type='right')
+fit <- survfit(survob~1,conf.type="none")
+```
+
+- Compute the support
+
+```{r}
+supp <- ESPA_supp(time,status)
+t.grid <- seq(supp[1],supp[2],by=1)
+```
+
+- Compute survival function over a grid of points
+
+```{r}
+saddle.sur <- rep(0,length(t.grid))
+for(i in 1:length(t.grid)){
+    saddle.sur[i]  <- ESPA_survival(t.grid[i], time, status, inc=.1)
+    }
+```
+
+- Plot the survival function
+
+```{r}
+title <- 'ovarian (n=26)'
+plot(fit,
+  lty=c(1,3,3),
+  main=title,
+  xlab="time",
+  conf.int=T, 
+  ylab="", 
+  yaxs="i", 
+  lwd=my.lwd, 
+  xlim=c(supp[1],supp[2]), 
+  col=c("black","grey","grey"))
+points(t.grid, saddle.sur, lwd=my.lwd, type='l', col='blue', lty=2)
+legend('bottomleft', legend=c('Kaplan-Meier','ESPA'),lwd = my.lwd,
+       col=c('black','blue'), lty=c(1,2,4))
+```
+
+
+##  asaur data (gastricXelox: n=48)
+
+- Data
+
+```{r}
+d <- gastricXelox
+time <- d$timeWeeks
+status <- d$delta
+```
+
+- KM
+
+```{r}
+survob <- Surv(time=time,event=status,type='right')
+fit  <- survfit(survob~1,conf.type="none")
+```
+
+- Compute the support
+
+```{r}
+supp  <- ESPA_supp(time,status)
+t.grid <- seq(supp[1],supp[2],by=1)
+```
+
+- Compute survival function over a grid of points
+
+```{r}
+saddle.sur <- rep(0,length(t.grid))
+for(i in 1:length(t.grid)){
+    saddle.sur[i] <- ESPA_survival(t.grid[i], time,status, inc=.1)
+    }
+```
+
+- Plot the survival function
+
+```{r}
+title <- 'gastricXelox (n=48)'
+plot(fit,lty=c(1,3,3),
+  main=title,
+  xlab="time",
+  conf.int=T, 
+  ylab="",
+  yaxs="i",
+  lwd=my.lwd,
+  xlim=c(supp[1],supp[2]), 
+  col=c("black","grey","grey"))
+points(t.grid, saddle.sur, lwd=my.lwd, type='l', col='blue', lty=2)
+legend('bottomleft', legend=c('Kaplan-Meier','ESPA'),lwd = my.lwd,
+       col=c('black','blue'), lty=c(1,2,4))
+```
+
+## genfan: n=70
+    
+- Data
+
+```{r}
+d <- genfan
+time <- d$hours
+status <- d$status 
+```
+
+- KM
+
+```{r}
+survob <- Surv(time=time,event=status,type='right')
+fit <- survfit(survob~1,conf.type="none")
+```
+
+- Compute the support
+
+```{r}
+supp <- ESPA_supp(time,status)
+t.grid <- seq(supp[1], supp[2], by=1)
+```
+
+- Compute survival function over a grid of points
+
+```{r}
+saddle.sur=rep(0,length(t.grid))
+for(i in 1:length(t.grid)){
+    saddle.sur[i] <- ESPA_survival(t.grid[i], time,status, inc=.1)
+    }
+```
+
+- Plot the survival function
+
+```{r}
+title <- 'genfan (n=70)'
+plot(fit,lty=c(1,3,3),
+  main=title,
+  xlab="time",
+  conf.int=T, 
+  ylab="",
+  yaxs="i",
+  lwd=my.lwd,
+  xlim=c(supp[1],supp[2]), 
+  col=c("black","grey","grey"))
+points(t.grid, saddle.sur, lwd=my.lwd, type='l', col='blue', lty=2)
+legend('bottomleft', legend=c('Kaplan-Meier','ESPA'),lwd = my.lwd,
+       col=c('black','blue'), lty=c(1,2,4))
+
+```
+
