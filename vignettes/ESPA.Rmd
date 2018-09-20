@@ -21,25 +21,24 @@ Install [R](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/).
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 pkgs <- c("actuar", "survival", "ggplot2", "gridExtra", "asaur")
 
 #   installed packages that were not installed already
 source("http://bioconductor.org/biocLite.R")
 biocLite(setdiff(pkgs,installed.packages()), suppressUpdates = TRUE)
 
-#devtools::install_github("PratheepaJ/ESPA")
-
+devtools::install_github("PratheepaJ/ESPA")
 ```
 
 
 ```{r}
 library(actuar)#     heavy tailed distributions
 library(survival)
-require(ggplot2)
-require(gridExtra)
+library(ggplot2)
+library(gridExtra)
 library(asaur)# dataset "gastricXelox"
-devtools::load_all(".")
+library(ESPA)
 ```
 
 
