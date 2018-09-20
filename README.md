@@ -14,4 +14,4 @@ devtools::install_github("PratheepaJ/ESPA")
 ```
 
 ## Workflow
-See vignettes for the detailed workflow.
+See [vignettes](https://github.com/PratheepaJ/ESPA/tree/master/vignettes) for the detailed workflow.
